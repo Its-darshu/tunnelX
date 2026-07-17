@@ -1,7 +1,7 @@
 use crate::TunnelError;
 
-pub const DEFAULT_RELAY_URL: &str = "wss://tunnelx.darsha.dev/tunnel";
-pub const DEFAULT_DOMAIN: &str = "tunnelx.darsha.dev";
+pub const DEFAULT_RELAY_URL: &str = "wss://tunnelx-relay-470u.onrender.com/tunnel";
+pub const DEFAULT_DOMAIN: &str = "tunnelx-relay-470u.onrender.com";
 pub const DEFAULT_BIND_ADDR: &str = "0.0.0.0:8443";
 
 #[derive(Debug, Clone)]
