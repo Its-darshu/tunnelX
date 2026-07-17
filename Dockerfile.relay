@@ -1,4 +1,4 @@
-FROM rust:1.85-bookworm AS builder
+FROM rust:1.95-bookworm AS builder
 
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
@@ -6,10 +6,12 @@ COPY client/Cargo.toml client/Cargo.toml
 COPY protocol/Cargo.toml protocol/Cargo.toml
 COPY relay/Cargo.toml relay/Cargo.toml
 COPY shared/Cargo.toml shared/Cargo.toml
+COPY tests/Cargo.toml tests/Cargo.toml
 COPY client client
 COPY protocol protocol
 COPY relay relay
 COPY shared shared
+COPY tests tests
 
 RUN cargo build --release --locked --package relay
 
