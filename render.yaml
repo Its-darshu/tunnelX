@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: tunnelx-relay
+    runtime: docker
+    dockerfilePath: Dockerfile.relay
+    plan: free
+    envVars:
+      - key: RELAY_BIND
+        value: 0.0.0.0:10000
+      - key: RELAY_DOMAIN
+        value: "tunnelx-relay.onrender.com" # Change this to your actual Render app domain once deployed
+      - key: PATH_ROUTING
+        value: "true"
+      - key: RUST_LOG
+        value: info
