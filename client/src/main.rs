@@ -33,6 +33,9 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Install default crypto provider for rustls (required in rustls 0.23+)
+    let _ = rustls::crypto::ring::default_provider().install_default();
+
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| "warn".into()))
         .with(tracing_subscriber::fmt::layer().with_target(false))
