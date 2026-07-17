@@ -52,7 +52,7 @@ impl ProxyHandler {
         body: Vec<u8>,
         tx: mpsc::Sender<TunnelFrame>,
     ) -> u16 {
-        let uri = match format!("http://127.0.0.1:{}{}", self.port, path).parse::<Uri>() {
+        let uri = match format!("http://localhost:{}{}", self.port, path).parse::<Uri>() {
             Ok(u) => u,
             Err(e) => {
                 let _ = tx
