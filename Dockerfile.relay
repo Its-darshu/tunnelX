@@ -1,0 +1,29 @@
+FROM rust:1.85-bookworm AS builder
+
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY client/Cargo.toml client/Cargo.toml
+COPY protocol/Cargo.toml protocol/Cargo.toml
+COPY relay/Cargo.toml relay/Cargo.toml
+COPY shared/Cargo.toml shared/Cargo.toml
+COPY client client
+COPY protocol protocol
+COPY relay relay
+COPY shared shared
+
+RUN cargo build --release --locked --package relay
+
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --uid 10001 --create-home tunnelx
+
+COPY --from=builder /app/target/release/relay /usr/local/bin/relay
+
+USER tunnelx
+EXPOSE 8443
+
+ENV RELAY_BIND=0.0.0.0:8443
+CMD ["relay"]

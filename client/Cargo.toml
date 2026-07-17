@@ -1,0 +1,39 @@
+[package]
+name = "client"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "tunnelx"
+path = "src/main.rs"
+
+[dependencies]
+protocol.workspace = true
+shared.workspace = true
+tokio.workspace = true
+serde.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+rand.workspace = true
+futures-util.workspace = true
+bytes.workspace = true
+http.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+http-body-util.workspace = true
+tokio-tungstenite.workspace = true
+rustls.workspace = true
+clap.workspace = true
+bincode.workspace = true
+
+# Terminal UI
+crossterm = "0.28"
+dialoguer = { version = "0.11", features = ["fuzzy-select"] }
+indicatif = "0.17"
+console = "0.15"
+qrcode = "0.14"
+arboard = "3"
+chrono = "0.4"
