@@ -295,6 +295,13 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
         if segments.len() >= 3 {
             let sub = segments[2].to_string();
             if !sub.is_empty() {
+                // If it is exactly /t/subdomain without trailing slash, redirect to /t/subdomain/
+                if segments.len() == 3 && !path.ends_with('/') {
+                    let query = req.uri().query().map(|q| format!("?{}", q)).unwrap_or_default();
+                    let redirect_url = format!("{}/{}", path, query);
+                    return axum::response::Redirect::temporary(&redirect_url).into_response();
+                }
+
                 path_subdomain = Some(sub);
 
                 // Rewrite path to omit /t/subdomain
