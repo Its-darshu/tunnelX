@@ -332,14 +332,17 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
                 let new_uri_str = format!("{}{}", new_path, query);
 
                 // Use builder to construct valid URI
-                if let Ok(uri) = axum::http::Uri::builder()
+                match axum::http::Uri::builder()
                     .path_and_query(new_uri_str.as_str())
                     .build()
                 {
-                    *req.uri_mut() = uri;
-                    tracing::debug!(uri = %uri, "rewrote request URI");
-                } else {
-                    tracing::warn!("failed to build rewritten URI: {}", new_uri_str);
+                    Ok(uri) => {
+                        tracing::debug!(uri = %uri, "rewrote request URI");
+                        *req.uri_mut() = uri;
+                    }
+                    Err(e) => {
+                        tracing::warn!(error = %e, uri = %new_uri_str, "failed to build rewritten URI");
+                    }
                 }
             }
         }
