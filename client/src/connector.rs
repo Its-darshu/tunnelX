@@ -99,7 +99,11 @@ async fn connect_and_serve(
     // ── Step 3: Show live tunnel info ──────────────────────────
     ui::print_tunnel_live(&public_url, config.port, expires_in);
 
+    // Record this tunnel so `tunnelx list`/`status` reflect reality.
+    crate::registry::register(&registered_subdomain, config.port, &public_url);
+
     let tunnel_start = Instant::now();
+    let mut last_heartbeat = Instant::now();
     let proxy = ProxyHandler::new(config.port);
     let (frame_tx, mut frame_rx) = mpsc::channel::<TunnelFrame>(256);
 
@@ -169,6 +173,12 @@ async fn connect_and_serve(
                     break;
                 }
                 ui::print_countdown(remaining);
+                // Refresh the registry heartbeat every ~5s so `list` keeps this
+                // tunnel marked active without rewriting the file every second.
+                if last_heartbeat.elapsed() >= Duration::from_secs(5) {
+                    crate::registry::heartbeat(&registered_subdomain);
+                    last_heartbeat = Instant::now();
+                }
             }
             // Request log entries from proxy
             entry = log_rx.recv() => {
@@ -284,6 +294,7 @@ async fn connect_and_serve(
     }
 
     // ── Cleanup ────────────────────────────────────────────────
+    crate::registry::unregister(&registered_subdomain);
     heartbeat_handle.abort();
     let _ = heartbeat_handle.await;
     write_task.abort();

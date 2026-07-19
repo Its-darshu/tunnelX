@@ -2,6 +2,7 @@ mod commands;
 mod connector;
 mod heartbeat;
 mod proxy;
+mod registry;
 mod ui;
 
 use clap::Parser;
