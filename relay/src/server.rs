@@ -322,17 +322,24 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
 
                 path_subdomain = Some(sub);
 
-                // Rewrite path to omit /t/subdomain
-                let rest = if segments.len() > 3 {
-                    format!("/{}", segments[3..].join("/"))
-                } else {
-                    "/".to_string()
-                };
+                // Rewrite path to omit /t/subdomain and preserve rest of path
+                let rest_path = segments[3..].join("/");
+                let new_path = if rest_path.is_empty() { "/".to_string() } else { format!("/{}", rest_path) };
+
+                tracing::debug!(original = path, rewritten = &new_path, "path rewrite");
 
                 let query = req.uri().query().map(|q| format!("?{}", q)).unwrap_or_default();
-                let new_uri = format!("{}{}", rest, query);
-                if let Ok(uri) = new_uri.parse::<axum::http::Uri>() {
+                let new_uri_str = format!("{}{}", new_path, query);
+
+                // Use builder to construct valid URI
+                if let Ok(uri) = axum::http::Uri::builder()
+                    .path_and_query(new_uri_str.as_str())
+                    .build()
+                {
                     *req.uri_mut() = uri;
+                    tracing::debug!(uri = %uri, "rewrote request URI");
+                } else {
+                    tracing::warn!("failed to build rewritten URI: {}", new_uri_str);
                 }
             }
         }
