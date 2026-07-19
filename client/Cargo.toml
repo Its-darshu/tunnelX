@@ -13,7 +13,6 @@ path = "src/main.rs"
 protocol.workspace = true
 shared.workspace = true
 tokio.workspace = true
-serde.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 thiserror.workspace = true
@@ -26,9 +25,14 @@ hyper-util.workspace = true
 http-body-util.workspace = true
 tokio-tungstenite.workspace = true
 rustls.workspace = true
-clap.workspace = true
+clap = { workspace = true, features = ["derive", "env", "wrap_help"] }
+clap_complete.workspace = true
 bincode.workspace = true
 hex.workspace = true
+serde = { workspace = true, features = ["derive"] }
+toml.workspace = true
+dirs.workspace = true
+serde_json.workspace = true
 
 # Terminal UI
 crossterm = "0.28"
