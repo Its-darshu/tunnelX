@@ -309,6 +309,9 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
 
     let mut path_subdomain = None;
     let mut rewrite_to: Option<String> = None;
+    // Whether we routed via the path-based world (so we plant/refresh the route
+    // cookie on the response). Host-based subdomain routing does not need it.
+    let mut path_routed = false;
 
     // 1. Explicit path-based routing: /t/<subdomain>/...
     if path.starts_with("/t/") {
@@ -323,6 +326,7 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
             }
 
             path_subdomain = Some(sub);
+            path_routed = true;
 
             // Rewrite path to omit /t/subdomain and preserve rest of path
             let rest_path = segments[3..].join("/");
@@ -334,17 +338,28 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
             rewrite_to = Some(format!("{}{}", new_path, query));
         }
     } else {
-        // 2. Absolute-path asset fallback (e.g. Vite emits /@vite/client, /src/main.tsx,
-        //    /@react-refresh — these bypass the /t/<sub>/ prefix). Recover the tunnel from
-        //    the Referer header, which for same-origin requests carries the full path.
-        if let Some(sub) = req
+        // 2. Absolute-path asset fallback for prefix-less requests (e.g. Vite emits
+        //    /@vite/client, /src/main.tsx, /@react-refresh). Resolve the tunnel from:
+        //    a) the Referer header (accurate for a document's direct sub-resources), then
+        //    b) the route cookie (survives deep ES-module import chains, where the referer
+        //       is the importing module's prefix-less URL rather than the /t/<sub>/ page).
+        let from_referer = req
             .headers()
             .get(header::REFERER)
             .and_then(|v| v.to_str().ok())
-            .and_then(subdomain_from_referer)
-        {
-            tracing::debug!(referer_subdomain = %sub, path = %path, "recovered tunnel from referer");
+            .and_then(subdomain_from_referer);
+
+        let resolved = from_referer.or_else(|| {
+            req.headers()
+                .get(header::COOKIE)
+                .and_then(|v| v.to_str().ok())
+                .and_then(subdomain_from_cookie)
+        });
+
+        if let Some(sub) = resolved {
+            tracing::debug!(subdomain = %sub, path = %path, "recovered tunnel for prefix-less request");
             path_subdomain = Some(sub);
+            path_routed = true;
             // Forward the original absolute path unchanged.
         }
     }
@@ -380,6 +395,15 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
                 None => return (StatusCode::NOT_FOUND, "invalid host or path-based tunnel").into_response(),
             }
         }
+    };
+
+    // When serving a tunnel via the path-based world, plant a cookie so that
+    // subsequent prefix-less requests (deep module imports, XHR, fonts) route back
+    // to the same tunnel even without a usable Referer.
+    let route_cookie = if path_routed {
+        Some(subdomain.clone())
+    } else {
+        None
     };
 
     let session = match crate::session::get_session(&subdomain) {
@@ -425,7 +449,7 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
         }
     }
 
-    proxy_http_request(req, subdomain, client_tx).await
+    proxy_http_request(req, subdomain, client_tx, route_cookie).await
 }
 
 async fn handle_browser_websocket(
@@ -458,6 +482,7 @@ async fn proxy_http_request(
     req: Request<Body>,
     subdomain: String,
     client_tx: mpsc::Sender<TunnelFrame>,
+    route_cookie: Option<String>,
 ) -> Response {
     let request_id = state::next_request_id();
     let (parts, body) = req.into_parts();
@@ -569,6 +594,15 @@ async fn proxy_http_request(
         }
     }
 
+    // Plant/refresh the route cookie so prefix-less follow-up requests (deep module
+    // imports, XHR, fonts) resolve back to this tunnel without a usable Referer.
+    if let Some(sub) = route_cookie {
+        let cookie = format!("tunnelx_route={sub}; Path=/; Max-Age=86400; SameSite=Lax");
+        if let Ok(val) = header::HeaderValue::from_str(&cookie) {
+            builder = builder.header(header::SET_COOKIE, val);
+        }
+    }
+
     builder.body(body_stream).unwrap_or_else(|_| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -594,6 +628,24 @@ fn subdomain_from_referer(referer: &str) -> Option<String> {
         }
     }
     None
+}
+
+/// Extract the tunnel subdomain from a Cookie header value.
+///
+/// Looks for `tunnelx_route=<subdomain>` among the semicolon-separated cookies.
+/// This is what makes deep ES-module import chains work: those requests carry no
+/// usable Referer, but the cookie rides on every request to the domain.
+fn subdomain_from_cookie(cookie_header: &str) -> Option<String> {
+    cookie_header.split(';').find_map(|pair| {
+        let (name, value) = pair.split_once('=')?;
+        if name.trim() == "tunnelx_route" {
+            let sub = value.trim();
+            if !sub.is_empty() {
+                return Some(sub.to_string());
+            }
+        }
+        None
+    })
 }
 
 #[cfg(test)]
@@ -631,6 +683,25 @@ mod tests {
         assert_eq!(subdomain_from_referer("https://tunnelx.darsha.dev/"), None);
         assert_eq!(subdomain_from_referer("https://example.com/t/"), None);
         assert_eq!(subdomain_from_referer("not a url"), None);
+    }
+
+    #[test]
+    fn extracts_subdomain_from_route_cookie() {
+        assert_eq!(
+            super::subdomain_from_cookie("tunnelx_route=arctic-bamboo-49"),
+            Some("arctic-bamboo-49".to_string())
+        );
+        assert_eq!(
+            super::subdomain_from_cookie("foo=bar; tunnelx_route=epic-sun-43; baz=qux"),
+            Some("epic-sun-43".to_string())
+        );
+    }
+
+    #[test]
+    fn ignores_cookie_without_route() {
+        assert_eq!(super::subdomain_from_cookie("session=abc; theme=dark"), None);
+        assert_eq!(super::subdomain_from_cookie("tunnelx_route="), None);
+        assert_eq!(super::subdomain_from_cookie(""), None);
     }
 
     async fn read_http_response(stream: &mut tokio::net::TcpStream) -> Vec<u8> {
