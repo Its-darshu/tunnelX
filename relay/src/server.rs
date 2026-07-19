@@ -17,6 +17,7 @@ use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::ReceiverStream;
 use uuid::Uuid;
 
+use crate::crypto;
 use crate::router::{self, extract_subdomain, is_websocket_upgrade, run_browser_ws_proxy};
 use crate::session::{insert_session, remove_session, Session};
 use crate::state::{self, PendingResponse};
@@ -109,6 +110,19 @@ async fn handle_client_connection(socket: axum::extract::ws::WebSocket, state: A
                             .await;
                         return;
                     }
+                    if reg_token.len() < shared::MIN_TOKEN_LENGTH {
+                        let _ = ws_tx
+                            .send(Message::Binary(
+                                encode_frame(&TunnelFrame::error(
+                                    400,
+                                    "invalid token: too short",
+                                ))
+                                .unwrap()
+                                .into(),
+                            ))
+                            .await;
+                        return;
+                    }
                     break (reg_token, requested_subdomain, duration_secs);
                 }
                 Ok(other) => {
@@ -183,14 +197,18 @@ async fn handle_client_connection(socket: axum::extract::ws::WebSocket, state: A
         )
     };
 
+    let token_hash = crypto::hash_token(&register_token);
     let session = Session {
         id: Uuid::new_v4(),
         subdomain: subdomain.clone(),
-        token: register_token,
+        token_hash,
         client_tx: client_tx.clone(),
         created_at: Instant::now(),
         last_heartbeat: Instant::now(),
+        last_request: Instant::now(),
+        request_count: 0,
         duration_secs,
+        client_addr: None,
     };
     insert_session(session);
 
@@ -370,6 +388,7 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
                 )
             })
             .filter_map(|(k, v)| v.to_str().ok().map(|val| (k.to_string(), val.to_string())))
+            .take(shared::MAX_HEADERS_PER_REQUEST)
             .collect();
 
         let req = Request::from_parts(parts, body);
@@ -438,6 +457,7 @@ async fn proxy_http_request(
             )
         })
         .filter_map(|(k, v)| v.to_str().ok().map(|val| (k.to_string(), val.to_string())))
+        .take(shared::MAX_HEADERS_PER_REQUEST)
         .collect();
 
     let frame = TunnelFrame::HttpRequest {
@@ -506,6 +526,14 @@ async fn proxy_http_request(
 
     let mut builder = Response::builder().status(status);
     for (name, value) in resp_headers {
+        if name.len() > shared::MAX_HEADER_NAME_LEN || value.len() > shared::MAX_HEADER_VALUE_LEN {
+            tracing::warn!(
+                header_name_len = name.len(),
+                header_value_len = value.len(),
+                "rejecting oversized header"
+            );
+            continue;
+        }
         if let (Ok(name), Ok(val)) = (
             header::HeaderName::from_bytes(name.as_bytes()),
             header::HeaderValue::from_str(&value),

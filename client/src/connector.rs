@@ -300,9 +300,12 @@ async fn connect_and_serve(
     Ok(())
 }
 
+/// Generate a cryptographically secure token for tunnel registration.
+/// Uses 32 random bytes (256 bits) for sufficient entropy.
 fn generate_token() -> String {
     let mut rng = rand::rng();
-    (0..32)
-        .map(|_| format!("{:02x}", rng.random_range(0..256)))
-        .collect()
+    let bytes: Vec<u8> = (0..32)
+        .map(|_| rng.random_range(0..256) as u8)
+        .collect();
+    hex::encode(&bytes)
 }
