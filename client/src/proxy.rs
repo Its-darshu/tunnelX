@@ -74,7 +74,10 @@ impl ProxyHandler {
         };
 
         let method = Method::from_bytes(method.as_bytes()).unwrap_or(Method::GET);
-        let mut req_builder = Request::builder().method(method).uri(uri);
+        let mut req_builder = Request::builder()
+            .method(method)
+            .uri(uri)
+            .header("connection", "close");
 
         for (name, value) in &headers {
             if is_hop_by_hop(name) {
