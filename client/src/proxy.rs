@@ -179,7 +179,7 @@ impl ProxyHandler {
         headers: Vec<(String, String)>,
         tx: mpsc::Sender<TunnelFrame>,
     ) {
-        let url = format!("ws://127.0.0.1:{}{}", self.port, path);
+        let url = format!("ws://localhost:{}{}", self.port, path);
         let mut request = match url.into_client_request() {
             Ok(request) => request,
             Err(e) => {
