@@ -785,7 +785,8 @@ mod tests {
         tunnel_tx
             .send(ClientWsMessage::Binary(
                 encode_frame(&TunnelFrame::Register {
-                    token: "test-token".into(),
+                    // Must be at least shared::MIN_TOKEN_LENGTH (32) chars.
+                    token: "test-token-0123456789abcdef0123456789".into(),
                     version: PROTOCOL_VERSION,
                     requested_subdomain: None,
                     duration_secs: None,
