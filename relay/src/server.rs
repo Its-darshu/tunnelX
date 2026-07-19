@@ -304,46 +304,63 @@ async fn handle_client_connection(socket: axum::extract::ws::WebSocket, state: A
 }
 
 async fn handle_public_request(State(state): State<AppState>, mut req: Request<Body>) -> Response {
-    let mut path_subdomain = None;
+    let path = req.uri().path().to_string();
+    let query = req.uri().query().map(|q| format!("?{}", q)).unwrap_or_default();
 
-    // Try path-based routing first
-    let path = req.uri().path();
+    let mut path_subdomain = None;
+    let mut rewrite_to: Option<String> = None;
+
+    // 1. Explicit path-based routing: /t/<subdomain>/...
     if path.starts_with("/t/") {
         let segments: Vec<&str> = path.split('/').collect();
-        if segments.len() >= 3 {
+        if segments.len() >= 3 && !segments[2].is_empty() {
             let sub = segments[2].to_string();
-            if !sub.is_empty() {
-                // If it is exactly /t/subdomain without trailing slash, redirect to /t/subdomain/
-                if segments.len() == 3 && !path.ends_with('/') {
-                    let query = req.uri().query().map(|q| format!("?{}", q)).unwrap_or_default();
-                    let redirect_url = format!("{}/{}", path, query);
-                    return axum::response::Redirect::temporary(&redirect_url).into_response();
-                }
 
-                path_subdomain = Some(sub);
+            // If it is exactly /t/subdomain without trailing slash, redirect to /t/subdomain/
+            if segments.len() == 3 && !path.ends_with('/') {
+                let redirect_url = format!("{}/{}", path, query);
+                return axum::response::Redirect::temporary(&redirect_url).into_response();
+            }
 
-                // Rewrite path to omit /t/subdomain and preserve rest of path
-                let rest_path = segments[3..].join("/");
-                let new_path = if rest_path.is_empty() { "/".to_string() } else { format!("/{}", rest_path) };
+            path_subdomain = Some(sub);
 
-                tracing::debug!(original = path, rewritten = &new_path, "path rewrite");
+            // Rewrite path to omit /t/subdomain and preserve rest of path
+            let rest_path = segments[3..].join("/");
+            let new_path = if rest_path.is_empty() {
+                "/".to_string()
+            } else {
+                format!("/{}", rest_path)
+            };
+            rewrite_to = Some(format!("{}{}", new_path, query));
+        }
+    } else {
+        // 2. Absolute-path asset fallback (e.g. Vite emits /@vite/client, /src/main.tsx,
+        //    /@react-refresh — these bypass the /t/<sub>/ prefix). Recover the tunnel from
+        //    the Referer header, which for same-origin requests carries the full path.
+        if let Some(sub) = req
+            .headers()
+            .get(header::REFERER)
+            .and_then(|v| v.to_str().ok())
+            .and_then(subdomain_from_referer)
+        {
+            tracing::debug!(referer_subdomain = %sub, path = %path, "recovered tunnel from referer");
+            path_subdomain = Some(sub);
+            // Forward the original absolute path unchanged.
+        }
+    }
 
-                let query = req.uri().query().map(|q| format!("?{}", q)).unwrap_or_default();
-                let new_uri_str = format!("{}{}", new_path, query);
-
-                // Use builder to construct valid URI
-                match axum::http::Uri::builder()
-                    .path_and_query(new_uri_str.as_str())
-                    .build()
-                {
-                    Ok(uri) => {
-                        tracing::debug!(uri = %uri, "rewrote request URI");
-                        *req.uri_mut() = uri;
-                    }
-                    Err(e) => {
-                        tracing::warn!(error = %e, uri = %new_uri_str, "failed to build rewritten URI");
-                    }
-                }
+    // Apply the URI rewrite for explicit path-based requests.
+    if let Some(new_uri_str) = rewrite_to {
+        match axum::http::Uri::builder()
+            .path_and_query(new_uri_str.as_str())
+            .build()
+        {
+            Ok(uri) => {
+                tracing::debug!(uri = %uri, "rewrote request URI");
+                *req.uri_mut() = uri;
+            }
+            Err(e) => {
+                tracing::warn!(error = %e, uri = %new_uri_str, "failed to build rewritten URI");
             }
         }
     }
@@ -561,6 +578,24 @@ async fn proxy_http_request(
     })
 }
 
+/// Extract the tunnel subdomain from a Referer header value.
+///
+/// The Referer of a path-routed page looks like
+/// `https://tunnelx.darsha.dev/t/arctic-bamboo-49/`. When the browser requests an
+/// absolute-path asset (e.g. Vite's `/@vite/client`), the request itself lacks the
+/// `/t/<sub>/` prefix, but the Referer still carries it, letting us route the asset.
+fn subdomain_from_referer(referer: &str) -> Option<String> {
+    let uri: axum::http::Uri = referer.parse().ok()?;
+    let path = uri.path();
+    if path.starts_with("/t/") {
+        let segments: Vec<&str> = path.split('/').collect();
+        if segments.len() >= 3 && !segments[2].is_empty() {
+            return Some(segments[2].to_string());
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
@@ -577,7 +612,26 @@ mod tests {
         },
     };
 
-    use super::{app, AppState};
+    use super::{app, subdomain_from_referer, AppState};
+
+    #[test]
+    fn extracts_subdomain_from_path_routed_referer() {
+        assert_eq!(
+            subdomain_from_referer("https://tunnelx.darsha.dev/t/arctic-bamboo-49/"),
+            Some("arctic-bamboo-49".to_string())
+        );
+        assert_eq!(
+            subdomain_from_referer("https://tunnelx.darsha.dev/t/epic-sun-43/some/page"),
+            Some("epic-sun-43".to_string())
+        );
+    }
+
+    #[test]
+    fn ignores_referer_without_tunnel_prefix() {
+        assert_eq!(subdomain_from_referer("https://tunnelx.darsha.dev/"), None);
+        assert_eq!(subdomain_from_referer("https://example.com/t/"), None);
+        assert_eq!(subdomain_from_referer("not a url"), None);
+    }
 
     async fn read_http_response(stream: &mut tokio::net::TcpStream) -> Vec<u8> {
         let mut response = Vec::new();
