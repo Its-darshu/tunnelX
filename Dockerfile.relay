@@ -12,6 +12,7 @@ COPY protocol protocol
 COPY relay relay
 COPY shared shared
 COPY tests tests
+COPY website website
 
 RUN cargo build --release --locked --package relay
 

@@ -303,9 +303,69 @@ async fn handle_client_connection(socket: axum::extract::ws::WebSocket, state: A
     tracing::info!(subdomain = subdomain_for_cleanup, "client disconnected");
 }
 
+// --- Marketing site --------------------------------------------------------
+//
+// tunnelx.darsha.dev is the path-based tunnel host, so it can't be pointed at a
+// separate static host. Instead the relay serves the landing page + docs for
+// requests that carry no tunnel context; real tunnels live under /t/<name>/.
+// The files are embedded into the binary at build time.
+const SITE_INDEX: &str = include_str!("../../website/index.html");
+const SITE_DOCS: &str = include_str!("../../website/docs.html");
+const SITE_CSS: &str = include_str!("../../website/styles.css");
+const SITE_JS: &str = include_str!("../../website/script.js");
+
+/// Top-level document routes for the site. These are never valid tunnel paths
+/// (tunnels are prefixed with /t/), so they can be answered before any
+/// cookie/referer routing.
+fn is_site_document(path: &str) -> bool {
+    matches!(path, "/" | "/index.html" | "/docs" | "/docs.html")
+}
+
+/// Map a request path to an embedded site file and its content type.
+fn site_asset(path: &str) -> Option<(&'static str, &'static str)> {
+    match path {
+        "/" | "/index.html" => Some((SITE_INDEX, "text/html; charset=utf-8")),
+        "/docs" | "/docs.html" => Some((SITE_DOCS, "text/html; charset=utf-8")),
+        "/styles.css" => Some((SITE_CSS, "text/css; charset=utf-8")),
+        "/script.js" => Some((SITE_JS, "application/javascript; charset=utf-8")),
+        _ => None,
+    }
+}
+
+/// Build a response for an embedded site file. When `clear_route_cookie` is set
+/// (document requests) we expire any lingering tunnelx_route cookie so the
+/// page's own assets are not misrouted to a previously-visited tunnel.
+fn site_response(body: &'static str, content_type: &'static str, clear_route_cookie: bool) -> Response {
+    let mut resp = ([(header::CONTENT_TYPE, content_type)], body).into_response();
+    if clear_route_cookie {
+        resp.headers_mut().insert(
+            header::SET_COOKIE,
+            header::HeaderValue::from_static("tunnelx_route=; Path=/; Max-Age=0; SameSite=Lax"),
+        );
+    }
+    resp
+}
+
 async fn handle_public_request(State(state): State<AppState>, mut req: Request<Body>) -> Response {
     let path = req.uri().path().to_string();
     let query = req.uri().query().map(|q| format!("?{}", q)).unwrap_or_default();
+
+    // Serve the marketing site for context-less document requests to the bare
+    // relay host. These paths never belong to a tunnel (those use /t/<name>/),
+    // so answer them directly — ahead of cookie routing — and clear any stale
+    // route cookie so the page's own assets load from the site, not a tunnel.
+    if req.method() == axum::http::Method::GET && is_site_document(&path) {
+        let host = req
+            .headers()
+            .get(header::HOST)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        if extract_subdomain(host, &state.domain).is_none() {
+            if let Some((body, ctype)) = site_asset(&path) {
+                return site_response(body, ctype, true);
+            }
+        }
+    }
 
     let mut path_subdomain = None;
     let mut rewrite_to: Option<String> = None;
@@ -392,7 +452,15 @@ async fn handle_public_request(State(state): State<AppState>, mut req: Request<B
 
             match extract_subdomain(&host, &state.domain) {
                 Some(s) => s,
-                None => return (StatusCode::NOT_FOUND, "invalid host or path-based tunnel").into_response(),
+                None => {
+                    // No tunnel context — serve the site asset if this is one of
+                    // its paths (e.g. /styles.css, /script.js), else the error.
+                    return match site_asset(&path) {
+                        Some((body, ctype)) => site_response(body, ctype, false),
+                        None => (StatusCode::NOT_FOUND, "invalid host or path-based tunnel")
+                            .into_response(),
+                    };
+                }
             }
         }
     };
