@@ -7,6 +7,8 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["Darshan"]
+repository = "https://github.com/Its-darshu/tunnelX"
+homepage = "https://github.com/Its-darshu/tunnelX"
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["full"] }
@@ -40,5 +42,5 @@ hex = "0.4"
 toml = "0.8"
 dirs = "5.0"
 serde_json = "1.0"
-protocol = { path = "protocol" }
-shared = { path = "shared" }
+protocol = { path = "protocol", version = "0.1.0", package = "tunnelx-protocol" }
+shared = { path = "shared", version = "0.1.0", package = "tunnelx-shared" }

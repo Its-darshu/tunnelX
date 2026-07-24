@@ -353,42 +353,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
-name = "client"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "bincode",
- "bytes",
- "chrono",
- "clap",
- "clap_complete",
- "console",
- "crossterm",
- "dialoguer",
- "dirs",
- "futures-util",
- "hex",
- "http",
- "http-body-util",
- "hyper",
- "hyper-util",
- "indicatif",
- "protocol",
- "qrcode",
- "rand",
- "rustls",
- "serde",
- "serde_json",
- "shared",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite 0.26.2",
- "toml",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "clipboard-win"
 version = "5.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1334,15 +1298,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "protocol"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "serde",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1463,13 +1418,11 @@ dependencies = [
  "hex",
  "hmac",
  "http",
- "protocol",
  "rand",
  "rustls",
  "rustls-pemfile",
  "serde",
  "sha2",
- "shared",
  "thiserror 2.0.18",
  "tokio",
  "tokio-stream",
@@ -1478,6 +1431,8 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
+ "tunnelx-protocol",
+ "tunnelx-shared",
  "uuid",
 ]
 
@@ -1692,14 +1647,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "shared"
-version = "0.1.0"
-dependencies = [
- "serde",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "shell-words"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1828,10 +1775,10 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "futures-util",
- "protocol",
- "shared",
  "tokio",
  "tokio-tungstenite 0.26.2",
+ "tunnelx-protocol",
+ "tunnelx-shared",
 ]
 
 [[package]]
@@ -2185,6 +2132,59 @@ dependencies = [
  "log",
  "rand",
  "sha1",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "tunnelx"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "bincode",
+ "bytes",
+ "chrono",
+ "clap",
+ "clap_complete",
+ "console",
+ "crossterm",
+ "dialoguer",
+ "dirs",
+ "futures-util",
+ "hex",
+ "http",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
+ "indicatif",
+ "qrcode",
+ "rand",
+ "rustls",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite 0.26.2",
+ "toml",
+ "tracing",
+ "tracing-subscriber",
+ "tunnelx-protocol",
+ "tunnelx-shared",
+]
+
+[[package]]
+name = "tunnelx-protocol"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "serde",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "tunnelx-shared"
+version = "0.1.0"
+dependencies = [
+ "serde",
  "thiserror 2.0.18",
 ]
 
