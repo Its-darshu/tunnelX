@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tunnelX — Documentation</title>
+  <meta name="description" content="Setup guide, command reference, configuration, and troubleshooting for tunnelX — secure localhost tunneling in one command." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ================= NAV ================= -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a class="nav__logo" href="index.html">tunnelX</a>
+
+      <nav class="nav__links" aria-label="Primary">
+        <a href="docs.html" class="is-active">Docs</a>
+        <a href="https://github.com/Its-darshu/tunnelX" rel="noopener">GitHub</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+
+      <div class="nav__actions">
+        <a class="btn btn--primary" href="https://github.com/Its-darshu/tunnelX" rel="noopener">Star on GitHub</a>
+        <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileMenu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <nav class="nav__mobile" id="mobileMenu" aria-label="Mobile">
+      <a href="docs.html">Docs</a>
+      <a href="https://github.com/Its-darshu/tunnelX" rel="noopener">GitHub</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+  </header>
+
+  <div class="docs container">
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="docs__sidebar" aria-label="Documentation">
+      <button class="docs__navtoggle" aria-expanded="false" aria-controls="docsNav">
+        On this page
+        <svg viewBox="0 0 12 8" width="12" height="8" fill="none" aria-hidden="true"><path d="M1 1.5 6 6.5 11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <nav class="docs__nav" id="docsNav">
+        <span class="docs__navlabel">Getting Started</span>
+        <a href="#introduction">Introduction</a>
+        <a href="#installation">Installation &amp; Setup</a>
+        <a href="#quick-start">Quick Start</a>
+        <span class="docs__navlabel">Reference</span>
+        <a href="#commands">Command Reference</a>
+        <a href="#configuration">Configuration</a>
+        <a href="#self-hosting">Self-Hosting the Relay</a>
+        <span class="docs__navlabel">Help</span>
+        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#support">Support</a>
+      </nav>
+    </aside>
+
+    <!-- ================= CONTENT ================= -->
+    <article class="docs__content">
+      <header class="docs__hero">
+        <span class="docs__eyebrow">Documentation</span>
+        <h1 class="docs__h1">Get started with tunnelX</h1>
+        <p class="docs__lead">Expose a local port to a secure public HTTPS URL in one command. This guide walks you through installation, everyday usage, configuration, and fixes for the most common issues.</p>
+      </header>
+
+      <!-- Introduction -->
+      <section id="introduction" class="docs__section">
+        <h2>Introduction</h2>
+        <p>tunnelX is a lightweight, secure, and fast localhost tunneling tool. It gives your local web app a public HTTPS URL — <code>https://my-app.darsha.dev</code> → <code>localhost:3000</code> — so you can share work, test webhooks, or demo to clients without deploying or touching your router.</p>
+        <p>The client is a single Rust binary. Traffic flows from the browser to a relay over HTTPS, then down to your machine over an encrypted WebSocket:</p>
+        <div class="cb" data-lang="text">
+          <div class="cb__bar"><span class="cb__lang">architecture</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>Browser → HTTPS → Relay Server → WSS → Tunnel Client → localhost</code></pre>
+        </div>
+      </section>
+
+      <!-- Installation -->
+      <section id="installation" class="docs__section">
+        <h2>Installation &amp; Setup</h2>
+
+        <h3>1. Prerequisites</h3>
+        <p>tunnelX is built with Rust, so you need the Rust toolchain (which ships with <code>cargo</code>). If you don't have it yet, install it with <a href="https://rustup.rs" rel="noopener">rustup</a>:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre>
+        </div>
+        <p>Confirm the toolchain is available:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>cargo --version   # cargo 1.7x or newer</code></pre>
+        </div>
+
+        <h3>2. Install the client</h3>
+        <p>The quickest way is straight from crates.io:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>cargo install tunnelx</code></pre>
+        </div>
+        <p>Or build from a local checkout of the repository:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>git clone https://github.com/Its-darshu/tunnelX.git
+cd tunnelX
+cargo install --path client</code></pre>
+        </div>
+
+        <h3>3. Verify the install</h3>
+        <p>Cargo installs binaries to <code>~/.cargo/bin</code>. Make sure that directory is on your <code>PATH</code>, then check the version:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx --version   # tunnelx 0.1.0</code></pre>
+        </div>
+        <div class="callout callout--tip">
+          <span class="callout__title">Tip</span>
+          <p>If <code>tunnelx: command not found</code> appears, add cargo's bin directory to your shell profile: <code>export PATH="$HOME/.cargo/bin:$PATH"</code>, then restart your terminal.</p>
+        </div>
+
+        <h3>4. Run your first tunnel</h3>
+        <p>Start a local server on any port (for example <code>python3 -m http.server 3000</code>), then expose it:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx 3000</code></pre>
+        </div>
+        <p>tunnelX prompts for a subdomain and duration, then prints your live URL:</p>
+        <div class="cb" data-lang="text">
+          <div class="cb__bar"><span class="cb__lang">output</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>🚀 TunnelX v0.1.0
+
+[1/3] Establishing connection...
+  ✔ Connected to TunnelX server
+[2/3] Registering tunnel...
+  ✔ Subdomain "my-app" registered!
+
+🌐 Tunnel is live!
+
+  https://my-app.darsha.dev  →  localhost:3000
+
+📋 Share this URL with your friends!</code></pre>
+        </div>
+
+        <h3>5. Shell completions (optional)</h3>
+        <p>Generate completion scripts for your shell so command and flag names auto-complete:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code># Bash
+tunnelx completions bash &gt; ~/.bash_completions
+echo "source ~/.bash_completions" &gt;&gt; ~/.bashrc
+
+# Zsh
+tunnelx completions zsh &gt; /usr/local/share/zsh/site-functions/_tunnelx
+
+# Fish
+tunnelx completions fish | sudo tee /usr/share/fish/vendor_completions.d/tunnelx.fish</code></pre>
+        </div>
+      </section>
+
+      <!-- Quick Start -->
+      <section id="quick-start" class="docs__section">
+        <h2>Quick Start</h2>
+        <p>The most common workflows in one place:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code># Interactive — prompts for subdomain and duration
+tunnelx 3000
+
+# Non-interactive — specify everything upfront
+tunnelx tunnel 3000 --subdomain my-app --duration 1800
+
+# Point at a custom relay server
+tunnelx 3000 --relay wss://relay.example.com/tunnel
+
+# List active tunnels
+tunnelx list
+
+# Check the status of one tunnel
+tunnelx status my-app</code></pre>
+        </div>
+        <p>While a tunnel is running you can use these keyboard shortcuts:</p>
+        <div class="docs__tablewrap">
+          <table class="docs__table">
+            <thead><tr><th>Key</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><kbd>c</kbd></td><td>Copy the public URL to your clipboard</td></tr>
+              <tr><td><kbd>q</kbd></td><td>Quit and close the tunnel</td></tr>
+              <tr><td><kbd>Ctrl</kbd> + <kbd>C</kbd></td><td>Quit and close the tunnel</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Commands -->
+      <section id="commands" class="docs__section">
+        <h2>Command Reference</h2>
+
+        <h3><code>tunnel</code> — start a new tunnel</h3>
+        <p>Expose a local port. When run as <code>tunnelx &lt;PORT&gt;</code> the <code>tunnel</code> subcommand is implied.</p>
+        <div class="docs__tablewrap">
+          <table class="docs__table">
+            <thead><tr><th>Option</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>-s, --subdomain &lt;NAME&gt;</code></td><td>Requested subdomain (skips the interactive prompt)</td></tr>
+              <tr><td><code>-d, --duration &lt;SECONDS&gt;</code></td><td>Tunnel duration in seconds</td></tr>
+              <tr><td><code>--relay &lt;URL&gt;</code></td><td>Custom relay WebSocket URL</td></tr>
+              <tr><td><code>--profile &lt;NAME&gt;</code></td><td>Use a specific configuration profile</td></tr>
+              <tr><td><code>--format &lt;text|json&gt;</code></td><td>Output format (default: <code>text</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3><code>config</code> — manage configuration &amp; profiles</h3>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx config init                 # create ~/.config/tunnelx/config.toml
+tunnelx config set &lt;KEY&gt; &lt;VALUE&gt;     # set a value
+tunnelx config get [KEY]            # read all or one value
+tunnelx config profiles            # list profiles
+tunnelx config validate            # check the config is valid
+tunnelx config reset --force       # restore defaults</code></pre>
+        </div>
+
+        <h3><code>list</code> — list active tunnels</h3>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx list              # simple list
+tunnelx list --detailed   # full table view
+tunnelx list --format json</code></pre>
+        </div>
+
+        <h3><code>status</code> — show tunnel status</h3>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx status my-app
+tunnelx status my-app --format json</code></pre>
+        </div>
+
+        <h3>Global options</h3>
+        <div class="docs__tablewrap">
+          <table class="docs__table">
+            <thead><tr><th>Option</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>-h, --help</code></td><td>Show the help message</td></tr>
+              <tr><td><code>-V, --version</code></td><td>Show the version</td></tr>
+              <tr><td><code>--debug</code></td><td>Enable debug logging (also <code>TUNNELX_DEBUG=1</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Configuration -->
+      <section id="configuration" class="docs__section">
+        <h2>Configuration</h2>
+        <p>tunnelX reads settings from <code>~/.config/tunnelx/config.toml</code>. Profiles let you keep separate relay/duration defaults for, say, development and production.</p>
+        <div class="cb" data-lang="toml">
+          <div class="cb__bar"><span class="cb__lang">config.toml</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>[profile.default]
+relay = "wss://relay.darsha.dev/tunnel"
+duration = 1800
+
+[profile.production]
+relay = "wss://prod-relay.example.com/tunnel"
+duration = 3600</code></pre>
+        </div>
+
+        <h3>Environment variables</h3>
+        <div class="docs__tablewrap">
+          <table class="docs__table">
+            <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>TUNNELX_RELAY</code></td><td><code>wss://relay.darsha.dev/tunnel</code></td><td>Client relay URL override</td></tr>
+              <tr><td><code>TUNNELX_DEBUG</code></td><td>—</td><td>Set to <code>1</code> to enable debug logging</td></tr>
+              <tr><td><code>RELAY_BIND</code></td><td><code>0.0.0.0:8443</code></td><td>Relay listen address (self-hosting)</td></tr>
+              <tr><td><code>RELAY_DOMAIN</code></td><td><code>darsha.dev</code></td><td>Base domain for tunnel URLs (self-hosting)</td></tr>
+              <tr><td><code>RUST_LOG</code></td><td><code>info</code></td><td>Log level</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Self hosting -->
+      <section id="self-hosting" class="docs__section">
+        <h2>Self-Hosting the Relay</h2>
+        <p>You can run your own relay for local development — no TLS certificate required:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>RELAY_BIND=127.0.0.1:8443 RELAY_DOMAIN=localhost cargo run --package relay
+tunnelx 3000 --relay ws://127.0.0.1:8443/tunnel</code></pre>
+        </div>
+        <div class="callout callout--warn">
+          <span class="callout__title">Heads up</span>
+          <p>Generated subdomains don't exist in public DNS during local development, so requests need a matching <code>Host</code> header. Replace <code>&lt;subdomain&gt;</code> with the value the client prints:</p>
+          <div class="cb" data-lang="bash">
+            <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+            <pre><code>curl -H 'Host: &lt;subdomain&gt;.localhost' http://127.0.0.1:8443/</code></pre>
+          </div>
+        </div>
+        <p>For a production deployment with Docker, wildcard DNS, and TLS certificates for <code>*.darsha.dev</code>, see <a href="https://github.com/Its-darshu/tunnelX/blob/main/docs/deployment.md" rel="noopener">docs/deployment.md</a>.</p>
+      </section>
+
+      <!-- Troubleshooting -->
+      <section id="troubleshooting" class="docs__section">
+        <h2>Troubleshooting</h2>
+        <p>Most problems fall into one of the buckets below. Run any tunnel command with <code>--debug</code> to see verbose logs while diagnosing.</p>
+
+        <h3><code>command not found: tunnelx</code></h3>
+        <p>The binary installed but isn't on your <code>PATH</code>. Cargo installs to <code>~/.cargo/bin</code> — add it to your shell profile and reload:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>echo 'export PATH="$HOME/.cargo/bin:$PATH"' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+tunnelx --version</code></pre>
+        </div>
+
+        <h3>Connection / relay issues</h3>
+        <p>If the tunnel can't establish a connection, confirm which relay it's targeting and re-run with debug logging:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code># See exactly what the client is doing
+tunnelx tunnel 3000 --debug
+
+# Check the configured relay URL
+tunnelx config get profile.default.relay</code></pre>
+        </div>
+        <div class="callout callout--tip">
+          <span class="callout__title">Tip</span>
+          <p>A corporate proxy or firewall can block outbound WebSocket (<code>wss://</code>) traffic. Try from a different network to rule this out, or point <code>--relay</code> at a relay you control.</p>
+        </div>
+
+        <h3>Local server not reachable through the tunnel</h3>
+        <p>The tunnel connects but requests return errors. Check that your app is actually listening on the port you exposed and is bound to <code>localhost</code>/<code>127.0.0.1</code> (not only an external interface). Confirm with:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>curl -I http://localhost:3000   # should return an HTTP status</code></pre>
+        </div>
+
+        <h3>Configuration problems</h3>
+        <p>If a command complains about invalid or missing config, validate it — then reset if needed:</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx config validate       # report problems
+tunnelx config path           # show which file is in use
+tunnelx config reset --force  # restore defaults</code></pre>
+        </div>
+
+        <h3>Shell completions not working</h3>
+        <p>Regenerate the completion script and re-source it (or open a new terminal):</p>
+        <div class="cb" data-lang="bash">
+          <div class="cb__bar"><span class="cb__lang">bash</span><button class="cb__copy" type="button">Copy</button></div>
+          <pre><code>tunnelx completions bash &gt; ~/.bash_completions
+source ~/.bash_completions</code></pre>
+        </div>
+
+        <h3>Subdomain already taken</h3>
+        <p>If a requested subdomain is in use, pick another with <code>--subdomain</code>, or omit it to get a random one. Check what's currently active with <code>tunnelx list</code>.</p>
+
+        <div class="docs__tablewrap">
+          <table class="docs__table">
+            <thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead>
+            <tbody>
+              <tr><td><code>command not found</code></td><td><code>~/.cargo/bin</code> not on PATH</td><td>Add it to your shell profile</td></tr>
+              <tr><td>Hangs at "Establishing connection"</td><td>Firewall blocks <code>wss://</code></td><td>Change network or relay</td></tr>
+              <tr><td><code>502 / connection refused</code> in browser</td><td>Local server not running on that port</td><td>Start the app; verify the port</td></tr>
+              <tr><td>Config errors</td><td>Malformed <code>config.toml</code></td><td><code>config validate</code> → <code>reset</code></td></tr>
+              <tr><td>Subdomain rejected</td><td>Name already registered</td><td>Choose a different subdomain</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Support -->
+      <section id="support" class="docs__section">
+        <h2>Support</h2>
+        <p>Still stuck? Open an issue or reach out:</p>
+        <ul class="docs__list">
+          <li>GitHub Issues — <a href="https://github.com/Its-darshu/tunnelX/issues" rel="noopener">github.com/Its-darshu/tunnelX/issues</a></li>
+          <li>Security reports — <a href="mailto:darshan99806@gmail.com">darshan99806@gmail.com</a></li>
+        </ul>
+      </section>
+    </article>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <span class="footer__logo">tunnelX</span>
+          <p class="footer__tagline">Share localhost with one command.<br />Fast, Secure, Zero configuration.</p>
+        </div>
+        <nav class="footer__nav" aria-label="Footer">
+          <a href="docs.html">Docs</a>
+          <a href="https://github.com/Its-darshu/tunnelX" rel="noopener">GitHub</a>
+          <a href="index.html#faq">FAQ</a>
+        </nav>
+      </div>
+
+      <hr class="footer__divider" />
+
+      <div class="footer__bottom">
+        <span>© 2026 TunnelX. All rights reserved.</span>
+        <span>Built for developers</span>
+      </div>
+
+      <div class="footer__watermark" aria-hidden="true">tunnelX</div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

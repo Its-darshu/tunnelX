@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tunnelX — Expose Localhost to the Internet. Instantly.</title>
+  <meta name="description" content="Secure, high-performance tunneling for modern developers. Share your local environment with colleagues, clients, or webhooks in seconds without touching your router." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ================= NAV ================= -->
+  <header class="nav">
+    <div class="nav__inner container">
+      <a class="nav__logo" href="#top">tunnelX</a>
+
+      <nav class="nav__links" aria-label="Primary">
+        <a href="docs.html">Docs</a>
+        <a href="https://github.com/Its-darshu/tunnelX" rel="noopener">GitHub</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav__actions">
+        <a class="btn btn--primary" href="https://github.com/Its-darshu/tunnelX" rel="noopener">Star on GitHub</a>
+        <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileMenu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+    <nav class="nav__mobile" id="mobileMenu" aria-label="Mobile">
+      <a href="docs.html">Docs</a>
+      <a href="https://github.com/Its-darshu/tunnelX" rel="noopener">GitHub</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- ================= HERO ================= -->
+    <section class="hero container">
+      <div class="hero__copy">
+        <h1 class="hero__title">
+          Expose Localhost to the<br />
+          Internet.<br />
+          <span class="hero__accent">Instantly.</span>
+        </h1>
+        <p class="hero__lead">
+          Secure, high-performance tunneling for modern developers.
+          Share your local environment with colleagues, clients, or
+          webhooks in seconds without touching your router.
+        </p>
+
+        <div class="install">
+          <div class="install__field">
+            <span class="install__prompt">$</span>
+            <code class="install__cmd" id="installCmd">cargo install tunnelx</code>
+            <button class="install__copy" id="copyBtn" aria-label="Copy install command">
+              <svg viewBox="0 0 14.1667 16.6667" width="15" height="17" fill="none" aria-hidden="true">
+                <path d="M5 13.3333C4.54167 13.3333 4.14931 13.1701 3.82292 12.8438C3.49653 12.5174 3.33333 12.125 3.33333 11.6667V1.66667C3.33333 1.20833 3.49653 0.815972 3.82292 0.489583C4.14931 0.163194 4.54167 0 5 0H12.5C12.9583 0 13.3507 0.163194 13.6771 0.489583C14.0035 0.815972 14.1667 1.20833 14.1667 1.66667V11.6667C14.1667 12.125 14.0035 12.5174 13.6771 12.8438C13.3507 13.1701 12.9583 13.3333 12.5 13.3333H5M5 11.6667H12.5V1.66667H5V11.6667M1.66667 16.6667C1.20833 16.6667 0.815972 16.5035 0.489583 16.1771C0.163194 15.8507 0 15.4583 0 15V3.33333H1.66667V15H10.8333V16.6667H1.66667Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <ul class="install__badges">
+            <li>
+              <svg viewBox="0 0 13.3333 13.3333" width="14" height="14" fill="none" aria-hidden="true">
+                <path d="M5.73333 9.73333L10.4333 5.03333L9.5 4.1L5.73333 7.86667L3.83333 5.96667L2.9 6.9L5.73333 9.73333M6.66667 13.3333C5.74444 13.3333 4.87778 13.1583 4.06667 12.8083C3.25556 12.4583 2.55 11.9833 1.95 11.3833C1.35 10.7833 0.875 10.0778 0.525 9.26667C0.175 8.45556 0 7.58889 0 6.66667C0 5.74444 0.175 4.87778 0.525 4.06667C0.875 3.25556 1.35 2.55 1.95 1.95C2.55 1.35 3.25556 0.875 4.06667 0.525C4.87778 0.175 5.74444 0 6.66667 0C7.58889 0 8.45556 0.175 9.26667 0.525C10.0778 0.875 10.7833 1.35 11.3833 1.95C11.9833 2.55 12.4583 3.25556 12.8083 4.06667C13.1583 4.87778 13.3333 5.74444 13.3333 6.66667C13.3333 7.58889 13.1583 8.45556 12.8083 9.26667C12.4583 10.0778 11.9833 10.7833 11.3833 11.3833C10.7833 11.9833 10.0778 12.4583 9.26667 12.8083C8.45556 13.1583 7.58889 13.3333 6.66667 13.3333M6.66667 12C8.15556 12 9.41667 11.4833 10.45 10.45C11.4833 9.41667 12 8.15556 12 6.66667C12 5.17778 11.4833 3.91667 10.45 2.88333C9.41667 1.85 8.15556 1.33333 6.66667 1.33333C5.17778 1.33333 3.91667 1.85 2.88333 2.88333C1.85 3.91667 1.33333 5.17778 1.33333 6.66667C1.33333 8.15556 1.85 9.41667 2.88333 10.45C3.91667 11.4833 5.17778 12 6.66667 12Z" fill="currentColor"/>
+              </svg>
+              No signup required
+            </li>
+            <li>
+              <svg viewBox="0 0 13.3333 13.3333" width="14" height="14" fill="none" aria-hidden="true">
+                <path d="M5.73333 9.73333L10.4333 5.03333L9.5 4.1L5.73333 7.86667L3.83333 5.96667L2.9 6.9L5.73333 9.73333M6.66667 13.3333C5.74444 13.3333 4.87778 13.1583 4.06667 12.8083C3.25556 12.4583 2.55 11.9833 1.95 11.3833C1.35 10.7833 0.875 10.0778 0.525 9.26667C0.175 8.45556 0 7.58889 0 6.66667C0 5.74444 0.175 4.87778 0.525 4.06667C0.875 3.25556 1.35 2.55 1.95 1.95C2.55 1.35 3.25556 0.875 4.06667 0.525C4.87778 0.175 5.74444 0 6.66667 0C7.58889 0 8.45556 0.175 9.26667 0.525C10.0778 0.875 10.7833 1.35 11.3833 1.95C11.9833 2.55 12.4583 3.25556 12.8083 4.06667C13.1583 4.87778 13.3333 5.74444 13.3333 6.66667C13.3333 7.58889 13.1583 8.45556 12.8083 9.26667C12.4583 10.0778 11.9833 10.7833 11.3833 11.3833C10.7833 11.9833 10.0778 12.4583 9.26667 12.8083C8.45556 13.1583 7.58889 13.3333 6.66667 13.3333M6.66667 12C8.15556 12 9.41667 11.4833 10.45 10.45C11.4833 9.41667 12 8.15556 12 6.66667C12 5.17778 11.4833 3.91667 10.45 2.88333C9.41667 1.85 8.15556 1.33333 6.66667 1.33333C5.17778 1.33333 3.91667 1.85 2.88333 2.88333C1.85 3.91667 1.33333 5.17778 1.33333 6.66667C1.33333 8.15556 1.85 9.41667 2.88333 10.45C3.91667 11.4833 5.17778 12 6.66667 12Z" fill="currentColor"/>
+              </svg>
+              Open source
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Terminal mock -->
+      <div class="hero__terminal">
+        <div class="term__glow" aria-hidden="true"></div>
+        <div class="term">
+          <div class="term__bar">
+            <span class="term__dot term__dot--red"></span>
+            <span class="term__dot term__dot--yellow"></span>
+            <span class="term__dot term__dot--green"></span>
+            <span class="term__title">tunnelx — terminal</span>
+          </div>
+          <div class="term__body">
+            <p class="term__line"><span class="c-amber">~</span> <span class="c-muted">$</span> <span class="c-ink">tunnelx 3000</span></p>
+            <p class="term__line c-muted">Initializing secure connection...</p>
+            <p class="term__line term__active">
+              <svg viewBox="0 0 10.8667 8.01667" width="12" height="9" fill="none" aria-hidden="true">
+                <path d="M3.8 8.01667L0 4.21667L0.95 3.26667L3.8 6.11667L9.91667 0L10.8667 0.95L3.8 8.01667Z" fill="currentColor"/>
+              </svg>
+              <span class="c-amber">Tunnel Active</span>
+            </p>
+            <dl class="term__meta">
+              <dt class="c-muted">Forwarding:</dt>
+              <dd class="c-link">https://my-app.darsha.dev</dd>
+              <dt class="c-muted">Web UI:</dt>
+              <dd class="c-ink">http://127.0.0.1:4040</dd>
+            </dl>
+            <div class="term__requests">
+              <div class="term__req">
+                <span class="req__method">GET /</span>
+                <span class="c-amber req__status">200 OK</span>
+                <span class="c-muted req__time">45ms</span>
+              </div>
+              <div class="term__req">
+                <span class="req__method">GET /api/users</span>
+                <span class="c-amber req__status">200 OK</span>
+                <span class="c-muted req__time">112ms</span>
+              </div>
+              <div class="term__waiting">
+                <span class="term__cursor"></span>
+                <span class="c-muted">Waiting for requests...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+    <section class="features container" id="faq">
+      <div class="section-head">
+        <h2 class="section-head__title section-head__title--sm">Engineered for Performance</h2>
+        <p class="section-head__sub">
+          Everything you need to test webhooks, demo to clients, and debug APIs without leaving
+          your terminal.
+        </p>
+      </div>
+      <div class="features__grid">
+        <article class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 20 20" width="20" height="20" fill="none" aria-hidden="true">
+              <path d="M10.0125 20C8.6375 20 7.34167 19.7375 6.125 19.2125C4.90833 18.6875 3.84583 17.9708 2.9375 17.0625C2.02917 16.1542 1.3125 15.0917 0.7875 13.875C0.2625 12.6583 0 11.3625 0 9.9875C0 8.6125 0.2625 7.32083 0.7875 6.1125C1.3125 4.90417 2.02917 3.84583 2.9375 2.9375C3.84583 2.02917 4.90833 1.3125 6.125 0.7875C7.34167 0.2625 8.6375 0 10.0125 0C11.3875 0 12.6792 0.2625 13.8875 0.7875C15.0958 1.3125 16.1542 2.02917 17.0625 2.9375C17.9708 3.84583 18.6875 4.90417 19.2125 6.1125C19.7375 7.32083 20 8.6125 20 9.9875C20 11.3625 19.7375 12.6583 19.2125 13.875C18.6875 15.0917 17.9708 16.1542 17.0625 17.0625C16.1542 17.9708 15.0958 18.6875 13.8875 19.2125C12.6792 19.7375 11.3875 20 10.0125 20M10 17.95C10.4333 17.35 10.8083 16.725 11.125 16.075C11.4417 15.425 11.7 14.7333 11.9 14H8.1C8.3 14.7333 8.55833 15.425 8.875 16.075C9.19167 16.725 9.56667 17.35 10 17.95M7.4 17.55C7.1 17 6.8375 16.4292 6.6125 15.8375C6.3875 15.2458 6.2 14.6333 6.05 14H3.1C3.58333 14.8333 4.1875 15.5583 4.9125 16.175C5.6375 16.7917 6.46667 17.25 7.4 17.55M12.6 17.55C13.5333 17.25 14.3625 16.7917 15.0875 16.175C15.8125 15.5583 16.4167 14.8333 16.9 14H13.95C13.8 14.6333 13.6125 15.2458 13.3875 15.8375C13.1625 16.4292 12.9 17 12.6 17.55M2.25 12H5.65C5.6 11.6667 5.5625 11.3375 5.5375 11.0125C5.5125 10.6875 5.5 10.35 5.5 10C5.5 9.65 5.5125 9.3125 5.5375 8.9875C5.5625 8.6625 5.6 8.33333 5.65 8H2.25C2.16667 8.33333 2.10417 8.6625 2.0625 8.9875C2.02083 9.3125 2 9.65 2 10C2 10.35 2.02083 10.6875 2.0625 11.0125C2.10417 11.3375 2.16667 11.6667 2.25 12M7.65 12H12.35C12.4 11.6667 12.4375 11.3375 12.4625 11.0125C12.4875 10.6875 12.5 10.35 12.5 10C12.5 9.65 12.4875 9.3125 12.4625 8.9875C12.4375 8.6625 12.4 8.33333 12.35 8H7.65C7.6 8.33333 7.5625 8.6625 7.5375 8.9875C7.5125 9.3125 7.5 9.65 7.5 10C7.5 10.35 7.5125 10.6875 7.5375 11.0125C7.5625 11.3375 7.6 11.6667 7.65 12M14.35 12H17.75C17.8333 11.6667 17.8958 11.3375 17.9375 11.0125C17.9792 10.6875 18 10.35 18 10C18 9.65 17.9792 9.3125 17.9375 8.9875C17.8958 8.6625 17.8333 8.33333 17.75 8H14.35C14.4 8.33333 14.4375 8.6625 14.4625 8.9875C14.4875 9.3125 14.5 9.65 14.5 10C14.5 10.35 14.4875 10.6875 14.4625 11.0125C14.4375 11.3375 14.4 11.6667 14.35 12M13.95 6H16.9C16.4167 5.16667 15.8125 4.44167 15.0875 3.825C14.3625 3.20833 13.5333 2.75 12.6 2.45C12.9 3 13.1625 3.57083 13.3875 4.1625C13.6125 4.75417 13.8 5.36667 13.95 6M8.1 6H11.9C11.7 5.26667 11.4417 4.575 11.125 3.925C10.8083 3.275 10.4333 2.65 10 2.05C9.56667 2.65 9.19167 3.275 8.875 3.925C8.55833 4.575 8.3 5.26667 8.1 6M3.1 6H6.05C6.2 5.36667 6.3875 4.75417 6.6125 4.1625C6.8375 3.57083 7.1 3 7.4 2.45C6.46667 2.75 5.6375 3.20833 4.9125 3.825C4.1875 4.44167 3.58333 5.16667 3.1 6Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3 class="card__title">Custom Subdomains</h3>
+          <p class="card__body">Claim predictable, memorable URLs for your projects. Stop updating webhook endpoints every time you restart.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 16 21" width="16" height="21" fill="none" aria-hidden="true">
+              <path d="M2 21C1.45 21 0.979167 20.8042 0.5875 20.4125C0.195833 20.0208 0 19.55 0 19V9C0 8.45 0.195833 7.97917 0.5875 7.5875C0.979167 7.19583 1.45 7 2 7H3V5C3 3.61667 3.4875 2.4375 4.4625 1.4625C5.4375 0.4875 6.61667 0 8 0C9.38333 0 10.5625 0.4875 11.5375 1.4625C12.5125 2.4375 13 3.61667 13 5V7H14C14.55 7 15.0208 7.19583 15.4125 7.5875C15.8042 7.97917 16 8.45 16 9V19C16 19.55 15.8042 20.0208 15.4125 20.4125C15.0208 20.8042 14.55 21 14 21H2M2 19H14V9H2V19M8 16C8.55 16 9.02083 15.8042 9.4125 15.4125C9.80417 15.0208 10 14.55 10 14C10 13.45 9.80417 12.9792 9.4125 12.5875C9.02083 12.1958 8.55 12 8 12C7.45 12 6.97917 12.1958 6.5875 12.5875C6.19583 12.9792 6 13.45 6 14C6 14.55 6.19583 15.0208 6.5875 15.4125C6.97917 15.8042 7.45 16 8 16M5 7H11V5C11 4.16667 10.7083 3.45833 10.125 2.875C9.54167 2.29167 8.83333 2 8 2C7.16667 2 6.45833 2.29167 5.875 2.875C5.29167 3.45833 5 4.16667 5 5V7Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3 class="card__title">Automatic HTTPS</h3>
+          <p class="card__body">End-to-end encryption by default. We provision and manage TLS certificates automatically for every tunnel you open.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 20 19" width="20" height="19" fill="none" aria-hidden="true">
+              <path d="M18.6 19L13.9 14.3C13.2167 14.8333 12.4625 15.25 11.6375 15.55C10.8125 15.85 9.93333 16 9 16C7.5 16 6.14583 15.6333 4.9375 14.9C3.72917 14.1667 2.775 13.2 2.075 12H4.525C5.09167 12.6167 5.75417 13.1042 6.5125 13.4625C7.27083 13.8208 8.1 14 9 14C10.6667 14 12.0833 13.4167 13.25 12.25C14.4167 11.0833 15 9.66667 15 8C15 6.33333 14.4167 4.91667 13.25 3.75C12.0833 2.58333 10.6667 2 9 2C7.43333 2 6.07917 2.52917 4.9375 3.5875C3.79583 4.64583 3.15833 5.95 3.025 7.5H1.025C1.15833 5.38333 1.9875 3.60417 3.5125 2.1625C5.0375 0.720833 6.86667 0 9 0C11.2333 0 13.125 0.775 14.675 2.325C16.225 3.875 17 5.76667 17 8C17 8.93333 16.85 9.8125 16.55 10.6375C16.25 11.4625 15.8333 12.2167 15.3 12.9L20 17.6L18.6 19M7.925 12L6.35 6.8L5.05 10.5H0V9H4L5.65 4.25H7.15L8.675 9.35L9.75 6H11.25L12.75 9H13.5V10.5H11.825L10.65 8.15L9.4 12H7.925Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3 class="card__title">Real-Time Logs</h3>
+          <p class="card__body">Inspect incoming requests and responses directly in the CLI or through our beautiful local web interface.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= COMMANDS GUIDE ================= -->
+    <section class="commands container" id="commands">
+      <div class="commands__intro">
+        <h2 class="commands__title">Commands Guide</h2>
+        <p class="commands__text">Designed for developers, TunnelX offers both a rich interactive UI and scriptable headless modes.</p>
+      </div>
+      <div class="code-panel">
+        <div class="code-panel__bar">Basic Usage</div>
+        <pre class="code-panel__pre"><code><span class="c-comment"># Expose a local HTTP server on port 8080</span>
+<span class="c-cmd">tunnelx</span> http 8080
+
+<span class="c-comment"># Request a specific subdomain</span>
+<span class="c-cmd">tunnelx</span> http 3000 --subdomain my-api
+
+<span class="c-comment"># Expose a local directory directly</span>
+<span class="c-cmd">tunnelx</span> file --path ./public
+
+<span class="c-comment"># Forward raw TCP traffic (e.g., SSH, Database)</span>
+<span class="c-cmd">tunnelx</span> tcp 5432</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <span class="footer__logo">tunnelX</span>
+          <p class="footer__tagline">Share localhost with one command.<br />Fast, Secure, Zero configuration.</p>
+        </div>
+        <nav class="footer__nav" aria-label="Footer">
+          <a href="docs.html">Docs</a>
+          <a href="https://github.com/Its-darshu/tunnelX" rel="noopener">GitHub</a>
+          <a href="index.html#faq">FAQ</a>
+        </nav>
+      </div>
+
+      <hr class="footer__divider" />
+
+      <div class="footer__bottom">
+        <span>© 2026 TunnelX. All rights reserved.</span>
+        <span>Built for developers</span>
+      </div>
+
+      <div class="footer__watermark" aria-hidden="true">tunnelX</div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
